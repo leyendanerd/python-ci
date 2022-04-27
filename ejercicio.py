@@ -24,7 +24,7 @@ class Estudiante(Persona):
         super().imprimirnombrelargo()
         return f'Su ano de graduacion es {self.graduacion}'
 
-Estudiante1 = Estudiante("Marcos", "la permuta", 2024, "Programador")
+Estudiante = Estudiante("Marcos", "la permuta", 2024, "Programador")
 #print(Estudiante1.apellido)
 
 #Estudiante.bienvenida()
