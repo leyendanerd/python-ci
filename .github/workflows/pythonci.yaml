@@ -7,8 +7,11 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  SERVICE_NAME: julio0619/python-ci
+
 jobs:
-  build:
+  build_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,9 +23,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - run: python ejercicio.py
   
-  deploy:
+  build_dockerhub:
     name: Build application on dockerhub
-    needs: [Build]
+    needs: [build_test]
     runs-on: ubuntu-latest
     steps:
       -
@@ -42,5 +45,27 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: julio0619/python-ci
+          tags: ${{ env.SERVICE_NAME }}
 
+  deploy_server:
+    name: Deploy application to the server
+    needs: [build_dockerhub]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connecting to server via ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secret.SSH_HOST }}
+          username: ${{ secret.SSH.USERNAME }}
+          password: ${{ secret.SSH.PASSWORD }}
+          port: ${{ secret.PORT }}
+          script_stop: true
+          script: |
+            cd /infra/docker
+            docker-compose -f pythonci.yaml pull
+            docker-compose -f pythonci.yaml up -d
+
+            
+
+
+  
